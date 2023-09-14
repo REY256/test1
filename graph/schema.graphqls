@@ -1,0 +1,22 @@
+type Country {
+  country_id: String!
+  probability: Float!
+}
+
+type User {
+  id: ID!
+  name: String!
+  surname: String!
+  patronymic: String!
+  age: Int!
+  gender: String!
+  country: [Country!]!
+}
+
+type Query {
+  id: ID!
+}
+
+type Mutation {
+  user: User!
+}
