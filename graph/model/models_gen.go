@@ -2,9 +2,27 @@
 
 package model
 
+type ChangeUser struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Surname    string `json:"surname"`
+	Patronymic string `json:"patronymic"`
+}
+
 type Country struct {
 	CountryID   string  `json:"country_id"`
 	Probability float64 `json:"probability"`
+}
+
+type DeleteUser struct {
+	ID string `json:"id"`
+}
+
+type NewUser struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Surname    string `json:"surname"`
+	Patronymic string `json:"patronymic"`
 }
 
 type User struct {

@@ -10,14 +10,24 @@ import (
 	"test1/graph/model"
 )
 
-// User is the resolver for the user field.
-func (r *mutationResolver) User(ctx context.Context) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
 }
 
-// ID is the resolver for the id field.
-func (r *queryResolver) ID(ctx context.Context) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
+// DeleteUser is the resolver for the deleteUser field.
+func (r *mutationResolver) DeleteUser(ctx context.Context, input model.DeleteUser) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+}
+
+// ChangeUser is the resolver for the changeUser field.
+func (r *mutationResolver) ChangeUser(ctx context.Context, input model.ChangeUser) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: ChangeUser - changeUser"))
+}
+
+// Users is the resolver for the users field.
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
+	panic(fmt.Errorf("not implemented: Users - users"))
 }
 
 // Mutation returns MutationResolver implementation.
@@ -28,3 +38,16 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) User(ctx context.Context) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
+}
+func (r *queryResolver) ID(ctx context.Context) (string, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
+}

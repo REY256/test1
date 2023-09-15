@@ -13,10 +13,30 @@ type User {
   country: [Country!]!
 }
 
+input NewUser {
+  id: ID!
+  name: String!
+  surname: String!
+  patronymic: String!
+}
+
+input ChangeUser {
+  id: ID!
+  name: String!
+  surname: String!
+  patronymic: String!
+}
+
 type Query {
+  users: [User!]!
+}
+
+input DeleteUser {
   id: ID!
 }
 
 type Mutation {
-  user: User!
+  createUser(input: NewUser!): User!
+  deleteUser(input: DeleteUser!): User!
+  changeUser(input: ChangeUser!): User!
 }

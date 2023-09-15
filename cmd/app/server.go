@@ -35,10 +35,12 @@ func main() {
 	if err != nil {
 		log.Fatal("failed to dial leader:", err)
 	}
+	fmt.Println("1")
 
-	batch := conn.ReadBatch(10e3, 1e6) // fetch 10KB min, 1MB max
-	b := make([]byte, 10e3)            // 10KB max per message
 	go func() {
+		batch := conn.ReadBatch(10e3, 1e6) // fetch 10KB min, 1MB max
+		b := make([]byte, 10e3)            // 10KB max per message
+
 		for {
 			n, err := batch.Read(b)
 			if err != nil {
@@ -56,11 +58,15 @@ func main() {
 		}
 	}()
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	fmt.Println("2")
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: graph.NewResolver()}))
 
+	fmt.Println("3")
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
+	fmt.Println("4")
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", serverPort)
 	log.Fatal(http.ListenAndServe(":"+serverPort, nil))
+	fmt.Println("5")
 }
