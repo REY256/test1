@@ -2,14 +2,19 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"test1/graph"
+	"test1/graph/model"
+	helpers "test1/internal"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/segmentio/kafka-go"
 )
@@ -29,28 +34,64 @@ func main() {
 	if kafkaPort == "" {
 		log.Fatal()
 	}
-	topic := os.Getenv("MAIN_TOPIC")
+	topic := os.Getenv("TOPIC")
+	err_topic := os.Getenv("ERR_TOPIC")
 
 	conn, err := kafka.DialLeader(context.Background(), "tcp", "localhost:"+kafkaPort, topic, 0)
 	if err != nil {
 		log.Fatal("failed to dial leader:", err)
 	}
+	err_conn, err := kafka.DialLeader(context.Background(), "tcp", "localhost:"+kafkaPort, err_topic, 0)
+	if err != nil {
+		log.Fatal("failed to dial leader:", err)
+	}
 	fmt.Println("1")
 
+	ctx := context.Background()
+
+	pool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pool.Close()
+
 	go func() {
-		batch := conn.ReadBatch(10e3, 1e6) // fetch 10KB min, 1MB max
-		b := make([]byte, 10e3)            // 10KB max per message
+		b := make([]byte, 1e6)
 
 		for {
-			n, err := batch.Read(b)
+			n, err := conn.Read(b)
 			if err != nil {
 				break
 			}
-			fmt.Println(string(b[:n]))
-		}
 
-		if err := batch.Close(); err != nil {
-			log.Fatal("failed to close batch:", err)
+			u := model.NewUser{}
+			if err := json.Unmarshal(b[:n], &u); err != nil {
+				err_conn.WriteMessages(kafka.Message{Value: []byte(b[:n])})
+			}
+
+			// обогащение сообщения
+			user, err := helpers.ProcessMessage(&u)
+			if err != nil {
+				break
+			}
+
+			ctx := context.Background()
+
+			tx, err := pool.Begin(ctx)
+			if err != nil {
+				break
+			}
+
+			_, err = tx.Exec(ctx, "insert into test_table(name, surname, patronymic, age, gender) values($1, $2, $3, $4, $5)", user.Name, user.Surname, user.Patronymic, user.Age, user.Gender)
+			if err != nil {
+				break
+			}
+
+			if err := tx.Commit(ctx); err != nil {
+				break
+			}
+
+			fmt.Println(user)
 		}
 
 		if err := conn.Close(); err != nil {
@@ -58,15 +99,22 @@ func main() {
 		}
 	}()
 
-	fmt.Println("2")
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: graph.NewResolver()}))
+	resolver := &graph.Resolver{Pool: pool}
 
-	fmt.Println("3")
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
+
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	fmt.Println("4")
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", serverPort)
 	log.Fatal(http.ListenAndServe(":"+serverPort, nil))
-	fmt.Println("5")
+
+	r := chi.NewRouter()
+
+	r.Get("/user", resolver.GetUserById)
+	r.Post("/user", resolver.AddUser)
+
+	http.ListenAndServe("127.0.0.1:8080", r)
+
+	fmt.Println("server online")
 }

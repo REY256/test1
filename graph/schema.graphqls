@@ -4,7 +4,7 @@ type Country {
 }
 
 type User {
-  id: ID!
+  id: Int!
   name: String!
   surname: String!
   patronymic: String!
@@ -14,14 +14,13 @@ type User {
 }
 
 input NewUser {
-  id: ID!
   name: String!
   surname: String!
   patronymic: String!
 }
 
 input ChangeUser {
-  id: ID!
+  id: Int!
   name: String!
   surname: String!
   patronymic: String!
@@ -32,7 +31,7 @@ type Query {
 }
 
 input DeleteUser {
-  id: ID!
+  id: Int!
 }
 
 type Mutation {

@@ -3,7 +3,7 @@
 package model
 
 type ChangeUser struct {
-	ID         string `json:"id"`
+	ID         int    `json:"id"`
 	Name       string `json:"name"`
 	Surname    string `json:"surname"`
 	Patronymic string `json:"patronymic"`
@@ -15,18 +15,17 @@ type Country struct {
 }
 
 type DeleteUser struct {
-	ID string `json:"id"`
+	ID int `json:"id"`
 }
 
 type NewUser struct {
-	ID         string `json:"id"`
 	Name       string `json:"name"`
 	Surname    string `json:"surname"`
 	Patronymic string `json:"patronymic"`
 }
 
 type User struct {
-	ID         string     `json:"id"`
+	ID         int        `json:"id"`
 	Name       string     `json:"name"`
 	Surname    string     `json:"surname"`
 	Patronymic string     `json:"patronymic"`
