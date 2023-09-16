@@ -7,6 +7,8 @@ type ChangeUser struct {
 	Name       string `json:"name"`
 	Surname    string `json:"surname"`
 	Patronymic string `json:"patronymic"`
+	Age        int    `json:"age"`
+	Gender     string `json:"gender"`
 }
 
 type Country struct {
@@ -22,6 +24,8 @@ type NewUser struct {
 	Name       string `json:"name"`
 	Surname    string `json:"surname"`
 	Patronymic string `json:"patronymic"`
+	Age        int    `json:"age"`
+	Gender     string `json:"gender"`
 }
 
 type User struct {

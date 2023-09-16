@@ -16,6 +16,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -54,6 +55,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer pool.Close()
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 
 	go func() {
 		b := make([]byte, 1e6)
@@ -99,7 +106,7 @@ func main() {
 		}
 	}()
 
-	resolver := &graph.Resolver{Pool: pool}
+	resolver := &graph.Resolver{Pool: pool, Rdb: rdb}
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
@@ -111,9 +118,10 @@ func main() {
 
 	r := chi.NewRouter()
 
-	r.Get("/user", resolver.GetUserById)
-	r.Post("/user", resolver.AddUser)
-	r.Post("/change_user", resolver.ChangeUser)
+	r.Get("/user", resolver.GetUserByIdHandler)
+	r.Post("/add_user", resolver.AddUserHandler)
+	r.Post("/change_user", resolver.ChangeUserHandler)
+	r.Delete("/delete_user", resolver.DeleteUserByIdHandler)
 
 	http.ListenAndServe("127.0.0.1:8080", r)
 

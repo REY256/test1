@@ -12,22 +12,53 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+	user := r.AddUser(ctx, input)
+	return &user, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, input model.DeleteUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: DeleteUser - deleteUser"))
+	user := r.DeleteUserById(ctx, input.ID)
+	return &user, nil
 }
 
 // ChangeUser is the resolver for the changeUser field.
 func (r *mutationResolver) ChangeUser(ctx context.Context, input model.ChangeUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: ChangeUser - changeUser"))
+	r.ChangeUserById(ctx, input)
+	user := model.User{
+		ID:         input.ID,
+		Name:       input.Name,
+		Surname:    input.Surname,
+		Patronymic: input.Patronymic,
+		Age:        input.Age,
+		Gender:     input.Gender,
+		Country:    []*model.Country{},
+	}
+	return &user, nil
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
+	var users []*model.User
+
+	rows, err := r.Pool.Query(ctx, "select id, name, surname, patronymic, age, gender from test_table")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var u model.User
+
+		err := rows.Scan(&u.ID, &u.Name, &u.Surname, &u.Patronymic, &u.Age, &u.Gender)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, &u)
+	}
+
+	return users, nil
 }
 
 // Mutation returns MutationResolver implementation.

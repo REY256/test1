@@ -17,6 +17,8 @@ input NewUser {
   name: String!
   surname: String!
   patronymic: String!
+  age: Int!
+  gender: String!
 }
 
 input ChangeUser {
@@ -24,6 +26,8 @@ input ChangeUser {
   name: String!
   surname: String!
   patronymic: String!
+  age: Int!
+  gender: String!
 }
 
 type Query {
