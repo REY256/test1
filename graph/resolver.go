@@ -68,7 +68,7 @@ func (app *Resolver) GetUserById(w http.ResponseWriter, r *http.Request) {
 	w.Write(userBytes)
 }
 
-func (app *Resolver) ChangeUserById(w http.ResponseWriter, r *http.Request) {
+func (app *Resolver) ChangeUser(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	body, err := io.ReadAll(r.Body)
