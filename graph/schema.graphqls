@@ -38,8 +38,13 @@ input DeleteUser {
   id: Int!
 }
 
+input GetUser {
+  id: Int!
+}
+
 type Mutation {
   createUser(input: NewUser!): User!
+  getUser(input: GetUser!): User!
   deleteUser(input: DeleteUser!): User!
   changeUser(input: ChangeUser!): User!
 }

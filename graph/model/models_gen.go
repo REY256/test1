@@ -20,6 +20,10 @@ type DeleteUser struct {
 	ID int `json:"id"`
 }
 
+type GetUser struct {
+	ID int `json:"id"`
+}
+
 type NewUser struct {
 	Name       string `json:"name"`
 	Surname    string `json:"surname"`

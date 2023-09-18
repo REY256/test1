@@ -12,20 +12,35 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	user := r.AddUser(ctx, input)
-	return &user, nil
+	user, err := r.s.AddUser(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+// GetUser is the resolver for the getUser field.
+func (r *mutationResolver) GetUser(ctx context.Context, input model.GetUser) (*model.User, error) {
+	user, err := r.s.GetUserById(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // DeleteUser is the resolver for the deleteUser field.
 func (r *mutationResolver) DeleteUser(ctx context.Context, input model.DeleteUser) (*model.User, error) {
-	user := r.DeleteUserById(ctx, input.ID)
-	return &user, nil
+	user, err := r.s.DeleteUserById(ctx, input.ID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // ChangeUser is the resolver for the changeUser field.
 func (r *mutationResolver) ChangeUser(ctx context.Context, input model.ChangeUser) (*model.User, error) {
-	r.ChangeUserById(ctx, input)
-	user := model.User{
+	r.s.ChangeUserById(ctx, input)
+	user := &model.User{
 		ID:         input.ID,
 		Name:       input.Name,
 		Surname:    input.Surname,
@@ -34,30 +49,15 @@ func (r *mutationResolver) ChangeUser(ctx context.Context, input model.ChangeUse
 		Gender:     input.Gender,
 		Country:    []*model.Country{},
 	}
-	return &user, nil
+	return user, nil
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	var users []*model.User
-
-	rows, err := r.Pool.Query(ctx, "select id, name, surname, patronymic, age, gender from test_table")
+	users, err := r.s.GetUsers(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var u model.User
-
-		err := rows.Scan(&u.ID, &u.Name, &u.Surname, &u.Patronymic, &u.Age, &u.Gender)
-		if err != nil {
-			return nil, err
-		}
-
-		users = append(users, &u)
-	}
-
 	return users, nil
 }
 
